@@ -11,7 +11,7 @@ export type OnStatusChange = (
   inputs: Inputs | null,
 ) => void | Promise<void>;
 
-export class Monitor {
+export class ZoomMonitor {
   status: ZoomStatus = ZoomStatus.UNKNOWN;
   inputs: Inputs | null = null;
   interval: Interval = Interval.FAST;
