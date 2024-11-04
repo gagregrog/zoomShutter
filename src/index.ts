@@ -1,7 +1,8 @@
-import { getZoomStatus } from "./zoom/zoom";
+import { getZoomStatus } from "./zoom/status";
 
 async function main() {
-  return getZoomStatus();
+  const status = await getZoomStatus();
+  console.log(status);
 }
 
 main().catch(console.error);
