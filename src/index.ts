@@ -1,8 +1,8 @@
-import { getZoomStatus } from "./zoom/status";
+import { Monitor } from "./zoom/monitor";
 
 async function main() {
-  const status = await getZoomStatus();
-  console.log(status);
+  const monitor = new Monitor(console.log);
+  monitor.run();
 }
 
 main().catch(console.error);

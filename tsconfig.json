@@ -3,6 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -10,7 +12,7 @@
     "skipLibCheck": true,
     "sourceMap": false,
     "moduleResolution": "node",
-    "outDir": "build",
+    "outDir": "build"
   },
   "include": ["src/**/*.ts"]
 }

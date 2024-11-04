@@ -10,22 +10,24 @@ export enum InputStatus {
   UNKNOWN = "UNKNOWN",
 }
 
-export type Zoom = {
-  status: ZoomStatus;
-  mic: InputStatus | null;
-  video: InputStatus | null;
-};
-
-export type ZoomInMeeting = {
-  status: ZoomStatus.IN_MEETING;
+export type Inputs = {
   mic: InputStatus.ON | InputStatus.OFF;
   video: InputStatus.ON | InputStatus.OFF;
 };
 
+export type Zoom = {
+  status: ZoomStatus;
+  inputs: Inputs | null;
+};
+
+export type ZoomInMeeting = {
+  status: ZoomStatus.IN_MEETING;
+  inputs: Inputs;
+};
+
 export type ZoomNoInput = {
   status: ZoomStatus.NOT_OPEN | ZoomStatus.NO_MEETING | ZoomStatus.UNKNOWN;
-  mic: null;
-  video: null;
+  inputs: null;
 };
 
 export async function getZoomStatus() {
@@ -40,7 +42,7 @@ function normalizeZoomStatus(
   zoomStatus: Omit<ZoomOsascriptResponse, "error"> & {
     error: ZoomError | null;
   },
-) {
+): Zoom {
   if (
     !zoomStatus.error &&
     typeof zoomStatus.mic === "boolean" &&
@@ -48,14 +50,15 @@ function normalizeZoomStatus(
   ) {
     return {
       status: ZoomStatus.IN_MEETING,
-      mic: zoomStatus.mic ? InputStatus.ON : InputStatus.OFF,
-      video: zoomStatus.video ? InputStatus.ON : InputStatus.OFF,
-    } as ZoomInMeeting;
+      inputs: {
+        mic: zoomStatus.mic ? InputStatus.ON : InputStatus.OFF,
+        video: zoomStatus.video ? InputStatus.ON : InputStatus.OFF,
+      },
+    };
   }
 
   return {
     status: errorToStatus(zoomStatus.error),
-    mic: null,
-    video: null,
+    inputs: null,
   } as ZoomNoInput;
 }
