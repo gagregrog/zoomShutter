@@ -1,5 +1,10 @@
 import { runAppleScriptFile } from "./applescript";
-import { errorToStatus, processZoomError, ZoomError } from "./errors";
+import {
+  errorToStatus,
+  PARSE_ERROR,
+  processZoomError,
+  ZoomError,
+} from "./errors";
 import { ZoomStatus, type ZoomOsascriptResponse } from "./shared";
 
 const ZOOM_SCRIPT = `${__dirname}/../scripts/get_zoom_status.scpt`;
@@ -32,7 +37,15 @@ export type ZoomNoInput = {
 
 export async function getZoomStatus() {
   const status = await runAppleScriptFile(ZOOM_SCRIPT);
-  const zoomStatus = JSON.parse(status) as ZoomOsascriptResponse;
+  let zoomStatus: ZoomOsascriptResponse | undefined;
+  try {
+    zoomStatus = JSON.parse(status) as ZoomOsascriptResponse;
+  } catch (error) {
+    console.error(error);
+    zoomStatus = {
+      error: PARSE_ERROR,
+    };
+  }
   const zoomError = processZoomError(zoomStatus.error);
 
   return normalizeZoomStatus({ ...zoomStatus, error: zoomError });

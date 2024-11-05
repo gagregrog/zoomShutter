@@ -12,6 +12,10 @@ export const NEEDS_PRIVILEGES = {
   code: -1719,
 } as const;
 
+export const PARSE_ERROR = {
+  message: "Could not parse osascript response",
+} as const;
+
 function normalizeZoomError(
   error: NonNullable<ZoomOsascriptResponse["error"]>,
 ): ZoomError {
