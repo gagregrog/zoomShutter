@@ -11,6 +11,9 @@ importers:
       serialport:
         specifier: ^12.0.0
         version: 12.0.0
+      yoctocolors-cjs:
+        specifier: ^2.1.2
+        version: 2.1.2
     devDependencies:
       '@eslint/js':
         specifier: ^9.14.0
@@ -621,6 +624,10 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  yoctocolors-cjs@2.1.2:
+    resolution: {integrity: sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA==}
+    engines: {node: '>=18'}
+
 snapshots:
 
   '@eslint-community/eslint-utils@4.4.1(eslint@9.14.0)':
@@ -1208,3 +1215,5 @@ snapshots:
   word-wrap@1.2.5: {}
 
   yocto-queue@0.1.0: {}
+
+  yoctocolors-cjs@2.1.2: {}

@@ -22,7 +22,7 @@ See the [Arduino](#arduino) section for more.
 
 ## Running
 
-Run with `pnpm start`.
+Run with `pnpm start` or `pnpm zoom`.
 
 This will find and connect to an Arduino via SerialPort and start a Zoom monitor.
 
@@ -31,6 +31,12 @@ Zoom video status will be polled every 10 seconds if no meeting is active, and e
 If the video is on, a command is sent to the Arduino to open the servo, and vice-versa if the video is off.
 
 If the connection to the Arduino is lost it will be polled every 5 seconds to reconnect.
+
+### Global Install
+
+You can use npm to install this globally on your system with `npm install -g .` from within this directory.
+
+You can then access the utility by invoking `zoomShutter` directly.
 
 ## Arduino
 

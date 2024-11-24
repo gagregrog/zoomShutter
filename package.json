@@ -1,14 +1,19 @@
 {
   "name": "zoom-shutter",
   "version": "1.0.0",
-  "description": "",
-  "main": "build/index.js",
+  "description": "Monitor Zoom for active webcam usage and send status changes to Arduino over serial",
+  "main": "./build/index.js",
+  "preferGlobal": true,
+  "bin": {
+    "zoomShutter": "./build/index.js"
+  },
   "scripts": {
     "lint": "pnpm eslint .",
     "build": "pnpm tsc",
     "postbuild": "mkdir -p build/scripts && cp src/scripts/*.scpt build/scripts",
     "build:watch": "pnpm tsc --watch",
-    "start": "node build/index.js"
+    "start": "node build/index.js",
+    "zoom": "pnpm start"
   },
   "keywords": [],
   "author": "Robert Reed",
@@ -23,6 +28,7 @@
     "typescript-eslint": "^8.12.2"
   },
   "dependencies": {
-    "serialport": "^12.0.0"
+    "serialport": "^12.0.0",
+    "yoctocolors-cjs": "^2.1.2"
   }
 }

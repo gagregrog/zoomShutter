@@ -1,26 +1,37 @@
 import { ReadlineParser, SerialPort } from "serialport";
-import { sleep } from "../sleep";
+import { sleep } from "../help/sleep";
+import { Logger } from "../help/log";
+
+const PORT_BUSY = "Error Resource temporarily unavailable Cannot lock port";
 
 const RECONNECT_INTERVAL = 5000;
 
 const OPEN_SERVO = "1" as const;
 const CLOSE_SERVO = "2" as const;
 
+enum Warnings {
+  NOT_FOUND = "NOT_FOUND",
+  BUSY = "BUSY",
+  DISCONNECTED = "DISCONNECTED",
+  UNKNOWN = "UNKNOWN",
+  NONE = "NONE",
+}
+
 export class Arduino {
   port: SerialPort | null = null;
   requestedDisconnect: boolean = false;
+  logger = new Logger("arduino", "blueBright");
+  warning = Warnings.NONE;
 
   async connect(): Promise<this> {
+    let didError = false;
     const arduino = await Arduino.find();
 
     if (!arduino) {
-      console.log(
-        "Could not find Arduino. Trying again in",
-        RECONNECT_INTERVAL / 1000,
-        "seconds",
-      );
-      await sleep(RECONNECT_INTERVAL);
-      return this.connect();
+      if (this.warning !== Warnings.NOT_FOUND) {
+        this.logger.warn("Could not find Arduino");
+      }
+      return this.reconnectAfterDelay(this.setWarning(Warnings.NOT_FOUND));
     }
 
     this.port = new SerialPort({
@@ -28,28 +39,51 @@ export class Arduino {
       baudRate: 115200,
     });
 
-    this.port.on("error", console.error);
-    this.port.on("close", () => {
-      this.port = null;
-      console.log("Connection to Arduino closed");
-      if (!this.requestedDisconnect) {
-        console.log(
-          "Trying to reconnect in",
-          RECONNECT_INTERVAL / 1000,
-          "seconds",
-        );
-        setTimeout(this.connect.bind(this), RECONNECT_INTERVAL);
+    this.port
+      .pipe(new ReadlineParser({ delimiter: "\r\n" }))
+      .on("data", (data) => {
+        this.logger.log("message", "magenta")(data);
+      });
+
+    this.port.on("error", (error) => {
+      didError = true;
+      const warning =
+        error.message === PORT_BUSY ? Warnings.BUSY : Warnings.UNKNOWN;
+      if (warning === Warnings.BUSY && this.warning !== warning) {
+        this.logger.warn(`Found device at ${arduino.path} but it is busy.`);
+      } else if (warning === Warnings.UNKNOWN) {
+        this.logger.error(error.message);
+      }
+
+      if (!this.port?.isOpen) {
+        return this.reconnectAfterDelay(this.setWarning(warning));
       }
     });
 
-    console.log(`Connected to Arduino on port ${arduino.path}`);
-
-    const parser = this.port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
-    parser.on("data", (data) => {
-      console.log("From Arduino:", data);
+    this.port.on("close", async () => {
+      this.port = null;
+      this.logger.warn("Connection closed\n");
+      if (!this.requestedDisconnect) {
+        return this.reconnectAfterDelay(this.setWarning(Warnings.DISCONNECTED));
+      }
     });
 
+    await sleep(200);
+    if (!didError) {
+      this.logger.info(`Connected on port ${arduino.path}\n`);
+    }
+
     return this;
+  }
+
+  private async reconnectAfterDelay(announce: boolean) {
+    if (announce) {
+      this.logger.info(
+        `Polling to connect every ${RECONNECT_INTERVAL / 1000} seconds...\n`,
+      );
+    }
+    await sleep(RECONNECT_INTERVAL);
+    return this.connect();
   }
 
   disconnect() {
@@ -57,6 +91,7 @@ export class Arduino {
     if (this.port) {
       this.port.close();
     }
+    return this;
   }
 
   openServo() {
@@ -71,9 +106,19 @@ export class Arduino {
 
   private write(message: string) {
     if (!this.port) {
-      console.error("Cannot write to Arduino before opening port");
+      this.logger.error("Cannot write before opening port\n");
+    } else {
+      this.port?.write(message);
     }
-    return this.port?.write(message);
+
+    return this;
+  }
+
+  private setWarning(warning: Warnings) {
+    const didChange = warning !== this.warning;
+    this.warning = warning;
+
+    return didChange;
   }
 
   static async find() {

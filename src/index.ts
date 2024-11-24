@@ -2,14 +2,14 @@ import { ZoomMonitor } from "./zoom/monitor";
 import { Arduino } from "./serial/arduino";
 import { OnStatusChange } from "./zoom/monitor";
 import { InputStatus } from "./zoom/status";
-import { sleep } from "./sleep";
+import { sleep } from "./help/sleep";
+import { Logger } from "./help/log";
 
 async function main() {
   const arduino = new Arduino();
   await arduino.connect();
-  const onStatusChange: OnStatusChange = (status, inputs) => {
-    console.log(status, inputs);
-    if (inputs?.video === InputStatus.ON) {
+  const onStatusChange: OnStatusChange = (results) => {
+    if (results.inputs?.video === InputStatus.ON) {
       arduino.openServo();
     } else {
       arduino.closeServo();
@@ -17,7 +17,7 @@ async function main() {
   };
 
   try {
-    const monitor = new ZoomMonitor(onStatusChange);
+    const monitor = new ZoomMonitor(onStatusChange, { log: true });
     monitor.run();
   } catch (error) {
     arduino.closeServo();
@@ -27,4 +27,4 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main().catch(new Logger("main", "whiteBright").error);
