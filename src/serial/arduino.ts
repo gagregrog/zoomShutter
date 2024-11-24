@@ -62,7 +62,7 @@ export class Arduino {
 
     this.port.on("close", async () => {
       this.port = null;
-      this.logger.warn("Connection closed\n");
+      this.logger.warn("Connection closed");
       if (!this.requestedDisconnect) {
         return this.reconnectAfterDelay(this.setWarning(Warnings.DISCONNECTED));
       }

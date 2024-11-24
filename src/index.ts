@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { ZoomMonitor } from "./zoom/monitor";
 import { Arduino } from "./serial/arduino";
 import { OnStatusChange } from "./zoom/monitor";
