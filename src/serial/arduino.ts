@@ -42,7 +42,7 @@ export class Arduino {
     this.port
       .pipe(new ReadlineParser({ delimiter: "\r\n" }))
       .on("data", (data) => {
-        this.logger.log("message", "magenta")(data);
+        this.logger.log("message", "cyanBright")(data);
       });
 
     this.port.on("error", (error) => {

@@ -42,7 +42,7 @@ export class ZoomMonitor {
   }
 
   async processStatus() {
-    const { status, inputs } = await getZoomStatus();
+    const { status, inputs } = await getZoomStatus(this.logger);
     this.interval = getPollIntervalMs(status);
 
     const didChange =
@@ -57,7 +57,17 @@ export class ZoomMonitor {
         previousStatus: this.status,
       };
 
-      if (this.log) this.logger.info(prettyStatus(results), "\n");
+      if (this.log) {
+        if (status === ZoomStatus.UNKNOWN) {
+          this.logger.warn("Unknown Status\n");
+        } else {
+          const toLog: Array<unknown> = [prettyStatus(results)];
+          if (status === ZoomStatus.IN_MEETING) {
+            toLog.push(inputs);
+          }
+          this.logger.log("status", "greenBright")(...toLog, "\n");
+        }
+      }
 
       try {
         await this.onChange(results);
@@ -93,11 +103,11 @@ function prettyStatus(result: OnStatuseChangeResult) {
       return "Application Closed";
     case ZoomStatus.IN_MEETING:
       if (result.previousStatus === ZoomStatus.NO_MEETING) {
-        return `Meeting joined ${result.inputs}`;
+        return "Meeting joined:";
       }
-      return `Input changed: ${result.inputs}`;
+      return "Input changed:";
     case ZoomStatus.UNKNOWN:
     default:
-      return "Unknown status";
+      return null;
   }
 }

@@ -1,3 +1,4 @@
+import { Logger } from "../help/log";
 import { runAppleScriptFile } from "./applescript";
 import {
   errorToStatus,
@@ -35,13 +36,14 @@ export type ZoomNoInput = {
   inputs: null;
 };
 
-export async function getZoomStatus() {
+export async function getZoomStatus(logger: Logger) {
   const status = await runAppleScriptFile(ZOOM_SCRIPT);
   let zoomStatus: ZoomOsascriptResponse | undefined;
   try {
     zoomStatus = JSON.parse(status) as ZoomOsascriptResponse;
   } catch (error) {
-    console.error(error);
+    logger.error((error as Error)?.message || error);
+    logger.info("Raw status:", status, "\n");
     zoomStatus = {
       error: PARSE_ERROR,
     };

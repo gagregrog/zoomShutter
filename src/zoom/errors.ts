@@ -4,16 +4,21 @@ export enum ZoomError {
   NOT_OPEN = "NOT_OPEN",
   NO_MEETING = "NO_MEETING",
   NEEDS_PRIVILEGES = "NEEDS_PRIVILEGES",
+  MENU_ERROR = "MENU_ERROR",
   UNKNOWN = "UNKNOWN",
 }
 
 export const NEEDS_PRIVILEGES = {
   message: "osascript is not allowed assistive access.",
-  code: -1719,
 } as const;
 
 export const PARSE_ERROR = {
   message: "Could not parse osascript response",
+} as const;
+
+export const MENU_ACCESS_ERROR = {
+  message:
+    'System Events got an error: Can’t get menu bar 1 of application process "zoom.us". Invalid index.',
 } as const;
 
 function normalizeZoomError(
@@ -26,6 +31,10 @@ function normalizeZoomError(
     case ZoomError.NO_MEETING:
       return error.message;
     default:
+      if (error.message === MENU_ACCESS_ERROR.message) {
+        return ZoomError.MENU_ERROR;
+      }
+
       return ZoomError.UNKNOWN;
   }
 }
@@ -47,6 +56,7 @@ export function errorToStatus(error: ZoomError | null): ZoomStatus {
   switch (error) {
     case ZoomError.NO_MEETING:
       return ZoomStatus.NO_MEETING;
+    case ZoomError.MENU_ERROR:
     case ZoomError.NOT_OPEN:
       return ZoomStatus.NOT_OPEN;
     case ZoomError.NEEDS_PRIVILEGES:
