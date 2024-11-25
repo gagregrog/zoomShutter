@@ -48,7 +48,7 @@ export async function getZoomStatus(logger: Logger) {
       error: PARSE_ERROR,
     };
   }
-  const zoomError = processZoomError(zoomStatus.error);
+  const zoomError = processZoomError(zoomStatus.error, logger);
 
   return normalizeZoomStatus({ ...zoomStatus, error: zoomError });
 }

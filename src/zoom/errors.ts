@@ -1,3 +1,4 @@
+import { Logger } from "../help/log";
 import { ZoomStatus, type ZoomOsascriptResponse } from "./shared";
 
 export enum ZoomError {
@@ -39,14 +40,18 @@ function normalizeZoomError(
   }
 }
 
-export function processZoomError(error: ZoomOsascriptResponse["error"]) {
+export function processZoomError(
+  error: ZoomOsascriptResponse["error"],
+  logger: Logger,
+) {
   if (!error) {
     return null;
   }
 
   const normalizedError = normalizeZoomError(error);
   if (normalizedError === ZoomError.NEEDS_PRIVILEGES) {
-    throw new Error("Terminal emulator lacks accessibility privileges");
+    logger.error("Please grant accessibility permissions to your terminal.\n");
+    throw new Error(ZoomError.NEEDS_PRIVILEGES);
   }
 
   return normalizedError;
