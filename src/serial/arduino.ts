@@ -18,10 +18,10 @@ enum Warnings {
 }
 
 export class Arduino {
-  port: SerialPort | null = null;
-  requestedDisconnect: boolean = false;
-  logger = new Logger("arduino", "blueBright");
-  warning = Warnings.NONE;
+  private port: SerialPort | null = null;
+  private requestedDisconnect: boolean = false;
+  private logger = new Logger("arduino", "blueBright");
+  private warning = Warnings.NONE;
 
   async connect(): Promise<this> {
     let didError = false;

@@ -18,12 +18,12 @@ export type OnStatusChange = (
 ) => void | Promise<void>;
 
 export class ZoomMonitor {
-  status: ZoomStatus = ZoomStatus.UNKNOWN;
-  inputs: Inputs | null = null;
-  interval: Interval = Interval.FAST;
-  onChange: OnStatusChange;
-  log: boolean = false;
-  logger = new Logger("zoom", "blue");
+  private status: ZoomStatus = ZoomStatus.UNKNOWN;
+  private inputs: Inputs | null = null;
+  private interval: Interval = Interval.FAST;
+  private onChange: OnStatusChange;
+  private log: boolean = false;
+  private logger = new Logger("zoom", "blue");
 
   constructor(onChange: OnStatusChange, options?: { log?: boolean }) {
     this.onChange = onChange;
