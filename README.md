@@ -38,6 +38,12 @@ You can use npm to install this globally on your system with `npm install -g .` 
 
 You can then access the utility by invoking `zoomShutter` directly.
 
+## Manual Overrides
+
+By default the process will run in sync with Zoom. If you need to manually open your shutter you can pass commands to the process over `stdin`.
+
+Simply type `open` to enter manual mode and `close` to return to automatic mode. Zoom status changes will be ignored while in manual mode.
+
 ## Arduino
 
 Compile the Arduino source using [Platform IO CLI](https://docs.platformio.org/en/latest/core/index.html) or Arduino IDE.
