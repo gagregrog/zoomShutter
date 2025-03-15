@@ -16,6 +16,8 @@ You must grant your terminal emulator accessibility privileges in order to query
 
 To do so, open `System Settings > Privacy & Security > Accessibility` and add your terminal emulator to the list of approved applications.
 
+If you have already done this and it was working but it stops working after an update, try removing the application from the list, closing the application, re-adding the application, then reopening the application.
+
 ### Arduino Setup
 
 See the [Arduino](#arduino) section for more.
