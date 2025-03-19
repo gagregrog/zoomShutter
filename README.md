@@ -40,11 +40,96 @@ You can use npm to install this globally on your system with `npm install -g .` 
 
 You can then access the utility by invoking `zoomShutter` directly.
 
+### Convenience Functions
+
+<details><summary>Add the following to your `~/.zshrc` or similar to expose helper functions and ensure that this library is always available on your system:</summary>
+
+```bash
+zoom() {
+	# Check if zoomShutter command exists
+	if ! command -v zoomShutter &> /dev/null; then
+		echo "zoomShutter not found. Installing..."
+
+		# Create ~/dev directory if it doesn't exist
+		mkdir -p ~/dev
+
+		# Check if the repo already exists
+		if [ ! -d ~/dev/zoomShutter ]; then
+			# Clone the repo
+			git clone git@github.com:gagregrog/zoomShutter.git ~/dev/zoomShutter || {
+				echo "Failed to clone zoomShutter repository"
+				return 1
+			}
+		fi
+
+		# Check if npm is available
+		if command -v npm &> /dev/null; then
+			# Store current directory
+			pushd ~/dev/zoomShutter
+			npm i -g .
+			popd
+		else
+			echo "npm not found. Please install Node.js and npm to complete setup."
+			return 1
+		fi
+	fi
+
+	# Check if tmux is available
+	if ! command -v tmux &> /dev/null; then
+		echo "Error: tmux is not installed. Please install tmux to use this function."
+		return 1
+	fi
+
+  # start or attach to the zoom tmux session
+	if tmux -L zoom list-sessions &> /dev/null; then
+		tmux -L zoom attach;
+	else
+		tmux -L zoom new-session -c ~/dev/zoomShutter "zoomShutter" \; split-window -c ~/dev/zoomShutter \; select-pane -t 0;
+	fi
+}
+
+zoom-toggle() {
+	if ! command -v tmux &> /dev/null; then
+		echo "Error: tmux is not installed. Please install tmux to use this function."
+		return 1
+	fi
+	tmux -L zoom send-keys -t 0 "toggle" Enter
+}
+
+zoom-open() {
+	if ! command -v tmux &> /dev/null; then
+		echo "Error: tmux is not installed. Please install tmux to use this function."
+		return 1
+	fi
+	tmux -L zoom send-keys -t 0 "open" Enter
+}
+
+zoom-close() {
+	if ! command -v tmux &> /dev/null; then
+		echo "Error: tmux is not installed. Please install tmux to use this function."
+		return 1
+	fi
+	tmux -L zoom send-keys -t 0 "close" Enter
+}
+
+zoom-stop() {
+	if ! command -v tmux &> /dev/null; then
+		echo "Error: tmux is not installed. Please install tmux to use this function."
+		return 1
+	fi
+	tmux -L zoom kill-server || true
+}
+```
+
+</details>
+
 ## Manual Overrides
 
 By default the process will run in sync with Zoom. If you need to manually open your shutter you can pass commands to the process over `stdin`.
 
-Simply type `open` to enter manual mode and `close` to return to automatic mode. Zoom status changes will be ignored while in manual mode.
+Simply type `open`, `o`, or `1` to enter manual mode. Type `close`, `c`, or `0` to return to automatic mode. Type `toggle` or `t` to toggle between the two.
+
+Zoom status changes will be ignored while in manual mode.
 
 ## Arduino
 
