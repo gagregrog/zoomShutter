@@ -34,10 +34,10 @@ export class StdIn {
       } else if (command.startsWith("t")) {
         console.log();
         if (this.isOpen) {
-          this.logger.info("Entering manual mode\n");
+          this.logger.info("Entering automatic mode\n");
           this.closeServo();
         } else {
-          this.logger.info("Entering automatic mode\n");
+          this.logger.info("Entering manual mode\n");
           this.openServo();
         }
       } else {
