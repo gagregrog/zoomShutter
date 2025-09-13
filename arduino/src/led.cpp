@@ -12,13 +12,6 @@ void _ledOn() { _ledWrite(true); }
 
 void _ledOff() { _ledWrite(false); }
 
-void _ledFormatCommand(LED_COMMAND command, const char* description) {
-  Serial.print("  ");
-  Serial.print(command);
-  Serial.print(" - ");
-  Serial.println(description);
-}
-
 // ************
 // ***PUBLIC***
 // ************
@@ -26,7 +19,6 @@ void _ledFormatCommand(LED_COMMAND command, const char* description) {
 void ledInit() {
   pinMode(LED_PIN, OUTPUT);
   _ledOff();
-  ledCommands();
 }
 
 void ledHandle(uint8_t command) {
@@ -38,12 +30,4 @@ void ledHandle(uint8_t command) {
     _ledOff();
     break;
   }
-}
-
-void ledCommands(void) {
-  Serial.println();
-  Serial.println("LED Commands:");
-  _ledFormatCommand(LED_COMMAND_ON, "Turn On");
-  _ledFormatCommand(LED_COMMAND_OFF, "Turn Off");
-  Serial.println("");
 }

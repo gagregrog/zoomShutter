@@ -22,7 +22,6 @@ enum SHUTTER_COMMAND {
 };
 
 void shutterInit(void);
-void shutterCommands(void);
 void shutterLoop(void);
 void shutterHandle(uint8_t command);
 SHUTTER_STATE shutterState(void);

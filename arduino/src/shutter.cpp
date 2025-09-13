@@ -27,20 +27,12 @@ void _servoOpen() { _servoWrite(180); }
 
 void _servoClose() { _servoWrite(0); }
 
-void _servoFormatCommand(SHUTTER_COMMAND command, const char* description) {
-  Serial.print("  ");
-  Serial.print(command);
-  Serial.print(" - ");
-  Serial.println(description);
-}
-
 // ************
 // ***PUBLIC***
 // ************
 
 void shutterInit() {
   _servoClose();
-  shutterCommands();
 }
 
 void shutterHandle(uint8_t command) {
@@ -85,13 +77,4 @@ SHUTTER_STATE shutterState(void) {
     break;
   }
   return _state;
-}
-
-void shutterCommands(void) {
-  Serial.println();
-  Serial.println("ZoomShutter Commands:");
-  _servoFormatCommand(SHUTTER_COMMAND_OPEN, "Open");
-  _servoFormatCommand(SHUTTER_COMMAND_CLOSE, "Close");
-  _servoFormatCommand(SHUTTER_COMMAND_STATE, "Get State");
-  Serial.println("");
 }

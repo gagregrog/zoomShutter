@@ -12,7 +12,6 @@ enum LED_COMMAND {
 };
 
 void ledInit(void);
-void ledCommands(void);
 void ledHandle(uint8_t command);
 
 #endif

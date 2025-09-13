@@ -1,20 +1,16 @@
 #include <Arduino.h>
+#include "communicate.h"
 #include "shutter.h"
 #include "led.h"
 
 void setup() {
-  Serial.begin(115200);
-  delay(1500);
+  communicateInit();
   shutterInit();
   ledInit();
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    uint8_t command = Serial.parseInt();
-    shutterHandle(command);
-    ledHandle(command);
-  }
+  communicateHandle();
   shutterLoop();
   delay(5);
 }
