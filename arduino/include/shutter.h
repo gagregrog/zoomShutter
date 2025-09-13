@@ -17,6 +17,7 @@ enum SHUTTER_COMMAND {
   SHUTTER_COMMAND_NOOP,
   SHUTTER_COMMAND_OPEN,
   SHUTTER_COMMAND_CLOSE,
+  SHUTTER_COMMAND_TOGGLE,
   SHUTTER_COMMAND_STATE,
   SHUTTER_COMMAND_END,
 };
@@ -24,6 +25,7 @@ enum SHUTTER_COMMAND {
 void shutterInit(void);
 void shutterLoop(void);
 void shutterHandle(uint8_t command);
+void shutterToggle(void);
 SHUTTER_STATE shutterState(void);
 
 #endif

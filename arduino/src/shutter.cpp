@@ -40,12 +40,15 @@ void shutterHandle(uint8_t command) {
     _servoOpen();
   } else if (command == SHUTTER_COMMAND_CLOSE && _state != SHUTTER_STATE_CLOSED) {
     _servoClose();
+  } else if (command == SHUTTER_COMMAND_TOGGLE) {
+    shutterToggle();
   }
 
   switch (command) {
   case SHUTTER_COMMAND_OPEN:
   case SHUTTER_COMMAND_CLOSE:
   case SHUTTER_COMMAND_STATE:
+  case SHUTTER_COMMAND_TOGGLE:
     shutterState();
     break;
   }
@@ -59,6 +62,14 @@ void shutterLoop() {
   unsigned long now = millis();
   if (now - _last_operation >= SERVO_TIMEOUT_MS) {
     _servo.detach();
+  }
+}
+
+void shutterToggle(void) {
+  if (_state == SHUTTER_STATE_OPEN) {
+    _servoClose();
+  } else {
+    _servoOpen();
   }
 }
 

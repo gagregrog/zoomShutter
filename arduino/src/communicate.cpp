@@ -26,6 +26,7 @@ void communicateShowCommands(void) {
   // Shutter commands
   _communicateFormatCommand(SHUTTER_COMMAND_OPEN, "Open Shutter");
   _communicateFormatCommand(SHUTTER_COMMAND_CLOSE, "Close Shutter");
+  _communicateFormatCommand(SHUTTER_COMMAND_TOGGLE, "Toggle Shutter");
   _communicateFormatCommand(SHUTTER_COMMAND_STATE, "Get Shutter State");
   
   // LED commands
