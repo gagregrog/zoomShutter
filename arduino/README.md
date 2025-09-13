@@ -27,3 +27,11 @@
   - `D+` to the second diode (right side of diode) [green wire]
   - `D-` to the first diode (right side of diode) [white wire]
   - ![pro-micro-usb](./assets/pro-micro-usb.jpg)
+
+## Flashing
+
+Install PlatformIO CLI and run the following to flash and monitor:
+
+```
+pio run --target upload && pio device monitor
+```
