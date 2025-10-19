@@ -18,7 +18,7 @@
   - Cathode to Resistor to `Pin 8`
   - Anode to `GND`
 - Servo
-  - Yellow (data) to `Pin 9`
+  - Yellow (data) to `Pin A3`
   - Orange to `VCC`
   - Brown to `GND`
 - Micro USB Breakout

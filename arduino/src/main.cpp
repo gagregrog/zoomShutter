@@ -11,7 +11,7 @@ void setup() {
   buttonInit();
 }
 
-void loop() {
+void loop() { 
   communicateHandle();
   shutterLoop();
   buttonLoop();

@@ -2,13 +2,15 @@
 
 Automatically open and close a shutter covering a webcam when your Zoom video status changes.
 
+Or, operate the shutter manually via serial or button press.
+
 ## Compatibility
 
-Relies on an applescript to query Zoom, so only works on MacOS.
+Automatic control relies on an applescript to query Zoom, so only works on MacOS.
 
 ## Setup and Installation
 
-Build with `pnpm install && pnpm build`.
+Build MacOS software with `pnpm install && pnpm build`.
 
 ### Grant Privileges
 
@@ -30,7 +32,7 @@ This will find and connect to an Arduino via SerialPort and start a Zoom monitor
 
 Zoom video status will be polled every 10 seconds if no meeting is active, and every 500 ms if an active meeting is detected.
 
-If the video is on, a command is sent to the Arduino to open the servo, and vice-versa if the video is off.
+If the video is on, a command is sent to the Arduino to open the servo, and vice-versa if the video is off (or if Zoom is closed).
 
 If the connection to the Arduino is lost it will be polled every 5 seconds to reconnect.
 
@@ -154,9 +156,9 @@ Send `1` to open it and `2` to close it.
 ```
 Brown -> GND
 Red -> VCC
-Yellow -> 9
+Yellow -> A3
 ```
 
-Connect a 90g servo to an Arduino Pro Micro on pin 9 and position it above your webcam with some sort of cover.
+Connect a 90g servo to an Arduino Pro Micro on pin A3 and position it above your webcam with some sort of cover.
 
 Connect the Arduino to your computer via USB.

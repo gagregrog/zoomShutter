@@ -4,7 +4,7 @@
 #ifndef SHUTTER_h
 #define SHUTTER_h
 
-#define SERVO_PIN 9
+#define SERVO_PIN A3
 #define SERVO_TIMEOUT_MS 1500
 
 enum SHUTTER_STATE {
