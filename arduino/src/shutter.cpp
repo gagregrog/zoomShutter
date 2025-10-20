@@ -23,7 +23,7 @@ void _servoWrite(uint8_t angle) {
   }
 }
 
-void _servoOpen() { _servoWrite(180); }
+void _servoOpen() { _servoWrite(91); }
 
 void _servoClose() { _servoWrite(0); }
 
