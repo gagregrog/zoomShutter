@@ -7,6 +7,7 @@ LOG_DIR="$HOME/Library/Logs/zoomShutter"
 LOG_FILE="$LOG_DIR/zoomShutter.log"
 STATE_DIR="$HOME/Library/Application Support/zoomShutter"
 CONTROL_FIFO="$STATE_DIR/control"
+ZOOMCTL_LINK="$HOME/.local/bin/zoomctl"
 TMUX_SOCKET="${ZOOM_TMUX_SOCKET:-zoom}"
 
 # launchd starts jobs with a minimal PATH, without tmux or the fnm node.

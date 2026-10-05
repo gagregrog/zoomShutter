@@ -48,11 +48,11 @@ Run `pnpm agent:install` to build the app and install a LaunchAgent. The agent s
 
 The agent runs `launchd/bin/zoomShutterLauncher`, a small compiled launcher. The launcher runs `launchd/run.sh`, which restarts the app 5 seconds after it exits. macOS checks Accessibility against the launcher, so grant Accessibility to `zoomShutterLauncher` only. The install builds the launcher again only when `launchd/launcher.c` changes. A new build needs a new grant.
 
-Control the app with `launchd/zoomctl.sh`:
+`agent:install` also links `launchd/zoomctl.sh` to `~/.local/bin/zoomctl`. Make sure `~/.local/bin` is on your `PATH`. Control the app with `zoomctl`:
 
 - `start`: start the agent if needed and create the `zoom` tmux console (socket `-L zoom`). Pane 0 shows the log and sends each line you type to the app.
 - `stop`: stop the app and the tmux console. The agent starts again at your next login.
-- `send <command>`: send a command, e.g. `zoomctl.sh send toggle`.
+- `send <command>`: send a command, e.g. `zoomctl send toggle`.
 - `tail`: follow the log.
 
 Logs go to `~/Library/Logs/zoomShutter/`:
@@ -62,7 +62,7 @@ Logs go to `~/Library/Logs/zoomShutter/`:
 
 The launcher uses the fnm `default` node. After you change the fnm default, run `pnpm agent:install` again.
 
-Run `pnpm agent:uninstall` to stop the app and remove the LaunchAgent.
+Run `pnpm agent:uninstall` to stop the app, remove the LaunchAgent and remove the `zoomctl` link.
 
 ### Convenience Functions
 
@@ -70,40 +70,44 @@ Run `pnpm agent:uninstall` to stop the app and remove the LaunchAgent.
 
 ```bash
 zoom() {
-	if [ ! -d ~/dev/zoomShutter ]; then
-		echo "zoomShutter not found. Installing..."
-		mkdir -p ~/dev
-		git clone git@github.com:gagregrog/zoomShutter.git ~/dev/zoomShutter || {
-			echo "Failed to clone zoomShutter repository"
-			return 1
-		}
+	if ! command -v zoomctl &> /dev/null; then
+		local dir="${ZOOM_SHUTTER_DIR:-$HOME/dev/zoomShutter}"
+		echo "zoomctl not found. Installing zoomShutter in $dir..."
+		if [ ! -d "$dir" ]; then
+			mkdir -p "$(dirname "$dir")"
+			git clone git@github.com:gagregrog/zoomShutter.git "$dir" || {
+				echo "Failed to clone zoomShutter repository"
+				return 1
+			}
+		fi
 		# The project pins pnpm via "packageManager", so drive it through corepack.
 		corepack enable &> /dev/null
-		(cd ~/dev/zoomShutter && corepack pnpm agent:install) || return 1
+		(cd "$dir" && corepack pnpm agent:install) || return 1
+		hash -r
 	fi
 
 	# start the agent and the tmux console if needed, then attach
-	~/dev/zoomShutter/launchd/zoomctl.sh start && tmux -L zoom attach
+	zoomctl start && tmux -L zoom attach
 }
 
 zoom-toggle() {
-	~/dev/zoomShutter/launchd/zoomctl.sh send toggle
+	zoomctl send toggle
 }
 
 zoom-open() {
-	~/dev/zoomShutter/launchd/zoomctl.sh send open
+	zoomctl send open
 }
 
 zoom-close() {
-	~/dev/zoomShutter/launchd/zoomctl.sh send close
+	zoomctl send close
 }
 
 zoom-stop() {
-	~/dev/zoomShutter/launchd/zoomctl.sh stop
+	zoomctl stop
 }
 
 zoom-tail() {
-	~/dev/zoomShutter/launchd/zoomctl.sh tail
+	zoomctl tail
 }
 ```
 

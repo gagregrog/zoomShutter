@@ -15,7 +15,12 @@ async function main() {
   await arduino.connect();
 
   // Waits so the close command reaches the Arduino before exit.
+  let shuttingDown = false;
   const shutdown = async (code: number) => {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
     try {
       arduino.closeServo();
       await sleep(1500);
@@ -28,6 +33,9 @@ async function main() {
 
   for (const signal of ["SIGINT", "SIGTERM"] as const) {
     process.on(signal, () => {
+      if (shuttingDown) {
+        return;
+      }
       console.log();
       logger.warn(`${signal} received. Cleaning up...\n`);
       shutdown(0);

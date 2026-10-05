@@ -18,6 +18,9 @@ if [ ! -x "$LAUNCHER" ] || [ launchd/launcher.c -nt "$LAUNCHER" ]; then
   echo "Built $LAUNCHER. Grant it Accessibility when macOS asks."
 fi
 
+mkdir -p "$(dirname "$ZOOMCTL_LINK")"
+ln -sfn "$REPO/launchd/zoomctl.sh" "$ZOOMCTL_LINK"
+
 mkdir -p "$LOG_DIR" "$(dirname "$PLIST")"
 cat > "$PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -49,6 +52,12 @@ PLIST
 
 "$REPO/launchd/zoomctl.sh" stop
 launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
+# bootout returns before the job exits, and bootstrap fails until it has.
+for _ in $(seq 50); do
+  launchctl print "$DOMAIN/$LABEL" &>/dev/null || break
+  sleep 0.2
+done
 launchctl bootstrap "$DOMAIN" "$PLIST"
 echo "Installed $PLIST"
+echo "Linked $ZOOMCTL_LINK"
 echo "Logs: $LOG_DIR"
