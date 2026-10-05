@@ -2,7 +2,7 @@
 
 import { ZoomMonitor } from "./zoom/monitor";
 import { Arduino } from "./serial/arduino";
-import { OnStatusChange } from "./zoom/monitor";
+import { OnStatusChange, OnStatuseChangeResult } from "./zoom/monitor";
 import { InputStatus } from "./zoom/status";
 import { sleep } from "./help/sleep";
 import { Logger } from "./help/log";
@@ -26,18 +26,24 @@ async function main() {
     }
   });
 
-  const overrides = new StdIn(arduino);
+  let lastResults: OnStatuseChangeResult | null = null;
+  const syncServo = () => {
+    if (lastResults?.inputs?.video === InputStatus.ON) {
+      arduino.openServo();
+    } else {
+      arduino.closeServo();
+    }
+  };
+
+  const overrides = new StdIn(arduino, syncServo);
   const onStatusChange: OnStatusChange = (results) => {
+    lastResults = results;
     if (overrides.getMode() === Mode.MANUAL) {
       logger.warn("Manual mode enabled. Ignoring status change.");
       return;
     }
 
-    if (results.inputs?.video === InputStatus.ON) {
-      arduino.openServo();
-    } else {
-      arduino.closeServo();
-    }
+    syncServo();
   };
 
   try {
