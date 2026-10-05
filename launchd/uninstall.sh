@@ -1,10 +1,10 @@
 #!/bin/bash
-# Removes the LaunchAgent. Does not stop a running zoom tmux session.
+# Stops the app and removes the LaunchAgent.
 set -euo pipefail
-
-LABEL="com.user.zoomshutter"
+source "$(dirname "$0")/env.sh"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
-launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+"$REPO/launchd/zoomctl.sh" stop
+launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
 rm -f "$PLIST"
 echo "Removed $PLIST"

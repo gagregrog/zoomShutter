@@ -14,24 +14,30 @@ async function main() {
   const arduino = new Arduino();
   await arduino.connect();
 
-  process.on("SIGINT", () => {
-    console.log();
-    logger.warn("Interrupt detected. Cleaning up...\n");
+  // Waits so the close command reaches the Arduino before exit.
+  const shutdown = async (code: number) => {
     try {
       arduino.closeServo();
+      await sleep(1500);
     } catch (error: unknown) {
       logger.error((error as Error)?.message);
     } finally {
-      process.exit();
+      process.exit(code);
     }
-  });
+  };
+
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    process.on(signal, () => {
+      console.log();
+      logger.warn(`${signal} received. Cleaning up...\n`);
+      shutdown(0);
+    });
+  }
 
   // The monitor polls in timers, so its errors surface here, not in main().
-  process.on("unhandledRejection", async (reason) => {
+  process.on("unhandledRejection", (reason) => {
     logger.error("Fatal:", reason);
-    arduino.closeServo();
-    await sleep(1500);
-    process.exit(1);
+    shutdown(1);
   });
 
   let lastResults: OnStatuseChangeResult | null = null;

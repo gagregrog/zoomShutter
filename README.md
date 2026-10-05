@@ -44,20 +44,25 @@ You can then access the utility by invoking `zoomShutter` directly.
 
 ### Start at Login
 
-Run `pnpm agent:install` to build the app and install a LaunchAgent. The agent runs `launchd/launch.sh` each time you log in.
+Run `pnpm agent:install` to build the app and install a LaunchAgent. The agent starts the app each time you log in. It runs the app outside tmux and outside your terminal.
 
-`launch.sh` starts a `zoom` tmux session (socket `-L zoom`) unless one already exists. The app runs in pane 0 and restarts 5 seconds after it exits. Press Ctrl-C in pane 0 to stop the restart loop.
+The agent runs `launchd/bin/zoomShutterLauncher`, a small compiled launcher. The launcher runs `launchd/run.sh`, which restarts the app 5 seconds after it exits. macOS checks Accessibility against the launcher, so grant Accessibility to `zoomShutterLauncher` only. The install builds the launcher again only when `launchd/launcher.c` changes. A new build needs a new grant.
+
+Control the app with `launchd/zoomctl.sh`:
+
+- `start`: start the agent if needed and create the `zoom` tmux console (socket `-L zoom`). Pane 0 shows the log and sends each line you type to the app.
+- `stop`: stop the app and the tmux console. The agent starts again at your next login.
+- `send <command>`: send a command, e.g. `zoomctl.sh send toggle`.
+- `tail`: follow the log.
 
 Logs go to `~/Library/Logs/zoomShutter/`:
 
-- `zoomShutter.log`: app output with timestamps. At 5 MB, the next launch moves it to `zoomShutter.log.1`.
-- `launchd.log`: errors from `launch.sh`.
+- `zoomShutter.log`: app output with timestamps. At 5 MB, the next start moves it to `zoomShutter.log.1`.
+- `launchd.log`: errors from the launcher and `run.sh`.
 
-The agent does not run through your terminal emulator, so it needs its own Accessibility privileges. If `zoomShutter.log` asks for them, add the binary that macOS names in `System Settings > Privacy & Security > Accessibility`.
+The launcher uses the fnm `default` node. After you change the fnm default, run `pnpm agent:install` again.
 
-The launcher uses the fnm `default` node. After you change the fnm default, run `pnpm agent:install` again and check the Accessibility privileges.
-
-Run `pnpm agent:uninstall` to remove the LaunchAgent.
+Run `pnpm agent:uninstall` to stop the app and remove the LaunchAgent.
 
 ### Convenience Functions
 
@@ -67,51 +72,38 @@ Run `pnpm agent:uninstall` to remove the LaunchAgent.
 zoom() {
 	if [ ! -d ~/dev/zoomShutter ]; then
 		echo "zoomShutter not found. Installing..."
+		mkdir -p ~/dev
 		git clone git@github.com:gagregrog/zoomShutter.git ~/dev/zoomShutter || {
 			echo "Failed to clone zoomShutter repository"
 			return 1
 		}
-		(cd ~/dev/zoomShutter && pnpm agent:install) || return 1
+		# The project pins pnpm via "packageManager", so drive it through corepack.
+		corepack enable &> /dev/null
+		(cd ~/dev/zoomShutter && corepack pnpm agent:install) || return 1
 	fi
 
-	# start the zoom tmux session if needed, then attach
-	~/dev/zoomShutter/launchd/launch.sh && tmux -L zoom attach
+	# start the agent and the tmux console if needed, then attach
+	~/dev/zoomShutter/launchd/zoomctl.sh start && tmux -L zoom attach
 }
 
 zoom-toggle() {
-	if ! command -v tmux &> /dev/null; then
-		echo "Error: tmux is not installed. Please install tmux to use this function."
-		return 1
-	fi
-	tmux -L zoom send-keys -t 0 "toggle" Enter
+	~/dev/zoomShutter/launchd/zoomctl.sh send toggle
 }
 
 zoom-open() {
-	if ! command -v tmux &> /dev/null; then
-		echo "Error: tmux is not installed. Please install tmux to use this function."
-		return 1
-	fi
-	tmux -L zoom send-keys -t 0 "open" Enter
+	~/dev/zoomShutter/launchd/zoomctl.sh send open
 }
 
 zoom-close() {
-	if ! command -v tmux &> /dev/null; then
-		echo "Error: tmux is not installed. Please install tmux to use this function."
-		return 1
-	fi
-	tmux -L zoom send-keys -t 0 "close" Enter
+	~/dev/zoomShutter/launchd/zoomctl.sh send close
 }
 
 zoom-stop() {
-	if ! command -v tmux &> /dev/null; then
-		echo "Error: tmux is not installed. Please install tmux to use this function."
-		return 1
-	fi
-	tmux -L zoom kill-server || true
+	~/dev/zoomShutter/launchd/zoomctl.sh stop
 }
 
 zoom-tail() {
-	tail -n 100 -f ~/Library/Logs/zoomShutter/zoomShutter.log
+	~/dev/zoomShutter/launchd/zoomctl.sh tail
 }
 ```
 

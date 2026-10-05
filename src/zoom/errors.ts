@@ -50,7 +50,7 @@ export function processZoomError(
 
   const normalizedError = normalizeZoomError(error);
   if (normalizedError === ZoomError.NEEDS_PRIVILEGES) {
-    logger.error("Please grant accessibility permissions to your terminal.\n");
+    logger.error("Grant Accessibility privileges to the process that runs zoomShutter.\n");
     throw new Error(ZoomError.NEEDS_PRIVILEGES);
   }
 
