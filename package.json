@@ -13,7 +13,9 @@
     "postbuild": "mkdir -p build/scripts && cp src/scripts/*.scpt build/scripts",
     "build:watch": "pnpm tsc --watch",
     "start": "node build/index.js",
-    "zoom": "pnpm start"
+    "zoom": "pnpm start",
+    "agent:install": "./launchd/install.sh",
+    "agent:uninstall": "./launchd/uninstall.sh"
   },
   "keywords": [],
   "author": "Robert Reed",

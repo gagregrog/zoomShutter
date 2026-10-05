@@ -26,6 +26,14 @@ async function main() {
     }
   });
 
+  // The monitor polls in timers, so its errors surface here, not in main().
+  process.on("unhandledRejection", async (reason) => {
+    logger.error("Fatal:", reason);
+    arduino.closeServo();
+    await sleep(1500);
+    process.exit(1);
+  });
+
   let lastResults: OnStatuseChangeResult | null = null;
   const syncServo = () => {
     if (lastResults?.inputs?.video === InputStatus.ON) {

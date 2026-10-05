@@ -42,52 +42,40 @@ You can use npm to install this globally on your system with `npm install -g .` 
 
 You can then access the utility by invoking `zoomShutter` directly.
 
+### Start at Login
+
+Run `pnpm agent:install` to build the app and install a LaunchAgent. The agent runs `launchd/launch.sh` each time you log in.
+
+`launch.sh` starts a `zoom` tmux session (socket `-L zoom`) unless one already exists. The app runs in pane 0 and restarts 5 seconds after it exits. Press Ctrl-C in pane 0 to stop the restart loop.
+
+Logs go to `~/Library/Logs/zoomShutter/`:
+
+- `zoomShutter.log`: app output with timestamps. At 5 MB, the next launch moves it to `zoomShutter.log.1`.
+- `launchd.log`: errors from `launch.sh`.
+
+The agent does not run through your terminal emulator, so it needs its own Accessibility privileges. If `zoomShutter.log` asks for them, add the binary that macOS names in `System Settings > Privacy & Security > Accessibility`.
+
+The launcher uses the fnm `default` node. After you change the fnm default, run `pnpm agent:install` again and check the Accessibility privileges.
+
+Run `pnpm agent:uninstall` to remove the LaunchAgent.
+
 ### Convenience Functions
 
 <details><summary>Add the following to your `~/.zshrc` or similar to expose helper functions and ensure that this library is always available on your system:</summary>
 
 ```bash
 zoom() {
-	# Check if zoomShutter command exists
-	if ! command -v zoomShutter &> /dev/null; then
+	if [ ! -d ~/dev/zoomShutter ]; then
 		echo "zoomShutter not found. Installing..."
-
-		# Create ~/dev directory if it doesn't exist
-		mkdir -p ~/dev
-
-		# Check if the repo already exists
-		if [ ! -d ~/dev/zoomShutter ]; then
-			# Clone the repo
-			git clone git@github.com:gagregrog/zoomShutter.git ~/dev/zoomShutter || {
-				echo "Failed to clone zoomShutter repository"
-				return 1
-			}
-		fi
-
-		# Check if npm is available
-		if command -v npm &> /dev/null; then
-			# Store current directory
-			pushd ~/dev/zoomShutter
-			npm i -g .
-			popd
-		else
-			echo "npm not found. Please install Node.js and npm to complete setup."
+		git clone git@github.com:gagregrog/zoomShutter.git ~/dev/zoomShutter || {
+			echo "Failed to clone zoomShutter repository"
 			return 1
-		fi
+		}
+		(cd ~/dev/zoomShutter && pnpm agent:install) || return 1
 	fi
 
-	# Check if tmux is available
-	if ! command -v tmux &> /dev/null; then
-		echo "Error: tmux is not installed. Please install tmux to use this function."
-		return 1
-	fi
-
-  # start or attach to the zoom tmux session
-	if tmux -L zoom list-sessions &> /dev/null; then
-		tmux -L zoom attach;
-	else
-		tmux -L zoom new-session -c ~/dev/zoomShutter "zoomShutter" \; split-window -c ~/dev/zoomShutter \; select-pane -t 0;
-	fi
+	# start the zoom tmux session if needed, then attach
+	~/dev/zoomShutter/launchd/launch.sh && tmux -L zoom attach
 }
 
 zoom-toggle() {
