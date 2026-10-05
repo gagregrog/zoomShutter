@@ -109,6 +109,10 @@ zoom-stop() {
 	fi
 	tmux -L zoom kill-server || true
 }
+
+zoom-tail() {
+	tail -n 100 -f ~/Library/Logs/zoomShutter/zoomShutter.log
+}
 ```
 
 </details>
