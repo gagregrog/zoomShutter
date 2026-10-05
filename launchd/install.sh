@@ -5,6 +5,22 @@ set -euo pipefail
 source "$(dirname "$0")/env.sh"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
+if [ -z "$NODE_BIN_DIR" ]; then
+  echo "No fnm default node. Run: fnm install --lts && fnm default lts-latest" >&2
+  exit 1
+fi
+if ! command -v tmux &>/dev/null; then
+  echo "tmux not found. Run: brew install tmux" >&2
+  exit 1
+fi
+if ! xcode-select -p &>/dev/null; then
+  echo "Xcode command line tools not found. Run: xcode-select --install" >&2
+  exit 1
+fi
+if ! command -v pnpm &>/dev/null; then
+  corepack enable
+fi
+
 cd "$REPO"
 pnpm install --frozen-lockfile
 pnpm build
@@ -52,12 +68,17 @@ PLIST
 
 "$REPO/launchd/zoomctl.sh" stop
 launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
-# bootout returns before the job exits, and bootstrap fails until it has.
-for _ in $(seq 50); do
-  launchctl print "$DOMAIN/$LABEL" &>/dev/null || break
-  sleep 0.2
-done
+wait_for_unload
 launchctl bootstrap "$DOMAIN" "$PLIST"
 echo "Installed $PLIST"
 echo "Linked $ZOOMCTL_LINK"
 echo "Logs: $LOG_DIR"
+
+echo
+echo "On first run, macOS asks to let zoomShutterLauncher control System Events,"
+echo "then for Accessibility. Grant both. If no Accessibility prompt appears, add"
+echo "$LAUNCHER in System Settings > Privacy & Security > Accessibility."
+echo
+echo "Waiting for the app to start..."
+sleep 5
+"$REPO/launchd/doctor.sh" || true

@@ -44,11 +44,11 @@ You can then access the utility by invoking `zoomShutter` directly.
 
 ### Start at Login
 
-Run `pnpm agent:install` to build the app and install a LaunchAgent. The agent starts the app each time you log in. It runs the app outside tmux and outside your terminal.
+Run `make install` to build the app and install a LaunchAgent. The agent starts the app each time you log in. It runs the app outside tmux and outside your terminal.
 
 The agent runs `launchd/bin/zoomShutterLauncher`, a small compiled launcher. The launcher runs `launchd/run.sh`, which restarts the app 5 seconds after it exits. macOS checks Accessibility against the launcher, so grant Accessibility to `zoomShutterLauncher` only. The install builds the launcher again only when `launchd/launcher.c` changes. A new build needs a new grant.
 
-`agent:install` also links `launchd/zoomctl.sh` to `~/.local/bin/zoomctl`. Make sure `~/.local/bin` is on your `PATH`. Control the app with `zoomctl`:
+`make install` also links `launchd/zoomctl.sh` to `~/.local/bin/zoomctl`. Make sure `~/.local/bin` is on your `PATH`. Control the app with `zoomctl`:
 
 - `start`: start the agent if needed and create the `zoom` tmux console (socket `-L zoom`). Pane 0 shows the log and sends each line you type to the app.
 - `stop`: stop the app and the tmux console. The agent starts again at your next login.
@@ -60,9 +60,11 @@ Logs go to `~/Library/Logs/zoomShutter/`:
 - `zoomShutter.log`: app output with timestamps. At 5 MB, the next start moves it to `zoomShutter.log.1`.
 - `launchd.log`: errors from the launcher and `run.sh`.
 
-The launcher uses the fnm `default` node. After you change the fnm default, run `pnpm agent:install` again.
+The launcher uses the fnm `default` node. After you change the fnm default, run `make install` again.
 
-Run `pnpm agent:uninstall` to stop the app, remove the LaunchAgent and remove the `zoomctl` link.
+Run `make doctor` to check the install. It checks the tools, the build, the LaunchAgent, the running app, the Arduino and the Accessibility grant, and prints a fix for each failure.
+
+Run `make uninstall` to stop the app, remove the LaunchAgent and remove the `zoomctl` link.
 
 ### Convenience Functions
 
@@ -80,9 +82,7 @@ zoom() {
 				return 1
 			}
 		fi
-		# The project pins pnpm via "packageManager", so drive it through corepack.
-		corepack enable &> /dev/null
-		(cd "$dir" && corepack pnpm agent:install) || return 1
+		make -C "$dir" install || return 1
 		hash -r
 	fi
 

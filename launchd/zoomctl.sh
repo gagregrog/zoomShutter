@@ -24,6 +24,11 @@ case "${1:-}" in
     ;;
   stop)
     launchctl kill SIGTERM "$DOMAIN/$LABEL" 2>/dev/null || true
+    # The app takes a moment to close the shutter before it exits.
+    for _ in $(seq 50); do
+      is_running || break
+      sleep 0.2
+    done
     tmux -L "$TMUX_SOCKET" kill-server 2>/dev/null || true
     ;;
   send)
